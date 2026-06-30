@@ -1,0 +1,2368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XMP - 创建广告</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --nav-h:44px;--sidebar-w:140px;--panel-w:210px;
+  --blue:#1890ff;--blue-light:#e6f7ff;--border:#e8e8e8;
+  --bg:#f0f2f5;--text:#333;--text-light:#666;--text-lighter:#999;
+  --green:#52c41a;--red:#f5222d;--warning:#faad14;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;font-size:13px;color:var(--text);background:var(--bg);overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#d9d9d9;border-radius:2px}
+
+/* ============ TOP NAV ============ */
+.topnav{height:var(--nav-h);background:#1a1a2e;display:flex;align-items:center;padding:0 16px;position:fixed;top:0;left:0;right:0;z-index:1000}
+.topnav-logo{display:flex;align-items:center;gap:6px;margin-right:24px;cursor:pointer}
+.topnav-logo svg{width:22px;height:20px}
+.topnav-logo span{color:#fff;font-weight:700;font-size:15px}
+.topnav-menu{display:flex;gap:0;flex:1}
+.topnav-item{color:#bbb;padding:0 14px;height:44px;display:flex;align-items:center;cursor:pointer;font-size:13px;transition:all .2s;border-bottom:2px solid transparent;position:relative}
+.topnav-item:hover{color:#fff}
+.topnav-item.active{color:#fff;border-bottom-color:var(--blue)}
+.topnav-item .badge{position:absolute;top:8px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--red)}
+.topnav-right{display:flex;align-items:center;gap:16px;color:#bbb}
+.topnav-right .icon-btn{cursor:pointer;font-size:15px;transition:color .2s}
+.topnav-right .icon-btn:hover{color:#fff}
+.topnav-right .lang{cursor:pointer;font-size:12px;padding:2px 6px;border-radius:3px}
+.topnav-right .lang:hover{background:rgba(255,255,255,.1)}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:600;cursor:pointer}
+
+/* ============ SIDEBAR ============ */
+.sidebar{width:var(--sidebar-w);position:fixed;left:0;top:var(--nav-h);bottom:0;background:#fff;border-right:1px solid var(--border);overflow-y:auto;z-index:100;padding:8px 0}
+.sidebar-group{margin-bottom:4px}
+.sidebar-group-title{padding:8px 16px 4px;font-size:11px;color:var(--text-lighter);text-transform:uppercase}
+.sidebar-item{padding:9px 16px 9px 20px;cursor:pointer;color:var(--text-light);font-size:13px;display:flex;align-items:center;gap:8px;transition:all .15s;position:relative;border-left:3px solid transparent}
+.sidebar-item:hover{background:#f5f7fa;color:var(--blue)}
+.sidebar-item.active{color:var(--blue);background:var(--blue-light);border-left-color:var(--blue);font-weight:500}
+.sidebar-item.done{color:var(--text)}
+.sidebar-item .dot{width:6px;height:6px;border-radius:50%;background:var(--blue);flex-shrink:0}
+.sidebar-item .icon{font-size:14px;width:16px;text-align:center;flex-shrink:0}
+
+/* ============ MAIN CONTENT ============ */
+.main{margin-left:var(--sidebar-w);margin-right:var(--panel-w);padding:16px 20px 76px;min-height:calc(100vh - var(--nav-h))}
+.main-inner{max-width:1200px;margin:0 auto}
+
+/* ============ RIGHT PANEL ============ */
+.right-panel{width:var(--panel-w);position:fixed;right:0;top:var(--nav-h);bottom:0;background:#fff;border-left:1px solid var(--border);overflow-y:auto;z-index:100;padding:14px 12px}
+.rp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rp-title{display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px}
+.rp-meta-icon{width:22px;height:22px;background:linear-gradient(135deg,#1877f2,#42b72a);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
+.rp-edit{color:var(--blue);cursor:pointer;font-size:12px}
+.rp-edit:hover{text-decoration:underline}
+.rp-count{font-size:12px;color:var(--text-light);margin-bottom:12px}
+.rp-count strong{color:var(--text)}
+.rp-table{width:100%;border-collapse:collapse}
+.rp-table th{font-size:11px;color:var(--text-lighter);padding:5px 0 3px;font-weight:400;text-align:left;border-bottom:1px solid var(--border)}
+.rp-table td{font-size:12px;padding:5px 0;border-bottom:1px solid #f5f5f5}
+.rp-table td:nth-child(2){text-align:center;color:var(--text-light)}
+.rp-table td:nth-child(3){text-align:right;color:var(--blue);font-size:11px;cursor:pointer}
+.rp-table tr:hover td{background:#fafafa}
+
+/* ============ SECTION CARD ============ */
+.section-card{background:#fff;border-radius:6px;margin-bottom:12px;border:1px solid var(--border);overflow:visible}
+.section-card.collapsed .section-body{display:none}
+.section-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f5f5f5;cursor:pointer}
+.section-header:hover{background:#fafafa}
+.section-title{font-size:14px;font-weight:600;color:#222;display:flex;align-items:center;gap:8px}
+.section-title .collapse-icon{font-size:10px;color:var(--text-lighter);transition:transform .2s}
+.section-card.collapsed .collapse-icon{transform:rotate(-90deg)}
+.section-status{font-size:11px;color:var(--text-lighter);display:flex;align-items:center;gap:6px}
+.section-status .status-done{color:var(--green)}
+.section-actions{display:flex;align-items:center;gap:12px}
+.section-edit{color:var(--blue);cursor:pointer;font-size:12px}
+.section-body{padding:20px}
+
+/* ============ FORM ELEMENTS ============ */
+.form-row{display:flex;align-items:flex-start;margin-bottom:16px;gap:12px}
+.form-row:last-child{margin-bottom:0}
+.form-label{width:140px;flex-shrink:0;font-size:13px;color:var(--text-light);padding-top:5px;display:flex;align-items:flex-start;gap:3px;line-height:1.5}
+.form-label.required::before{content:'*';color:var(--red);margin-right:2px}
+.form-label .tip{color:var(--text-lighter);cursor:help;font-size:12px;margin-left:2px}
+.form-control{flex:1;min-width:0}
+
+.form-input{width:100%;height:32px;border:1px solid #d9d9d9;border-radius:4px;padding:0 11px;font-size:13px;color:var(--text);outline:none;transition:all .2s;background:#fff}
+.form-input:hover{border-color:var(--blue)}
+.form-input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(24,144,255,.2)}
+.form-input::placeholder{color:#bbb}
+.form-input.has-value{border-color:#91caff;background:#fafffe}
+textarea.form-input{height:auto;padding:8px 11px;line-height:1.5}
+
+.form-select-wrap{position:relative}
+.form-select{width:100%;height:32px;border:1px solid #d9d9d9;border-radius:4px;padding:0 30px 0 11px;font-size:13px;color:#bbb;outline:none;background:#fff;appearance:none;cursor:pointer;transition:all .2s}
+.form-select:hover{border-color:var(--blue)}
+.form-select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(24,144,255,.2)}
+.form-select.has-value{color:var(--text)}
+.form-select-arrow{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-lighter);font-size:10px}
+
+/* Name hints */
+.name-hints{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.name-tag{padding:2px 8px;border:1px solid #d9d9d9;border-radius:3px;font-size:11px;color:var(--text-light);cursor:pointer;transition:all .15s;background:#fff}
+.name-tag:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.name-expand{color:var(--blue);cursor:pointer;font-size:11px;padding:3px 0}
+
+/* Toggle switch */
+.toggle-row{display:flex;align-items:center;gap:8px;padding-top:3px}
+.switch{width:38px;height:20px;background:#d9d9d9;border-radius:10px;position:relative;cursor:pointer;transition:background .25s;flex-shrink:0}
+.switch.on{background:var(--green)}
+.switch::after{content:'';width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left .25s;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.switch.on::after{left:20px}
+.toggle-label{font-size:12px;color:var(--text-lighter)}
+
+/* Button groups (tab-style) */
+.btn-grp{display:inline-flex}
+.btn-grp .btn-tab{padding:5px 12px;border:1px solid #d9d9d9;font-size:12px;cursor:pointer;background:#fff;color:var(--text-light);transition:all .15s;white-space:nowrap}
+.btn-grp .btn-tab:first-child{border-radius:4px 0 0 4px}
+.btn-grp .btn-tab:last-child{border-radius:0 4px 4px 0}
+.btn-grp .btn-tab:not(:first-child){border-left:none}
+.btn-grp .btn-tab.active{background:var(--blue);border-color:var(--blue);color:#fff;position:relative;z-index:1}
+.btn-grp .btn-tab:hover:not(.active){border-color:var(--blue);color:var(--blue);position:relative;z-index:1}
+
+/* Strategy tabs */
+.strategy-tabs{display:flex;gap:0;flex-wrap:wrap}
+.strategy-tab{padding:5px 12px;border:1px solid #d9d9d9;font-size:12px;cursor:pointer;background:#fff;color:var(--text-light);transition:all .15s}
+.strategy-tab:first-child{border-radius:4px 0 0 4px}
+.strategy-tab:last-child{border-radius:0 4px 4px 0}
+.strategy-tab:not(:first-child){border-left:none}
+.strategy-tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* Budget input */
+.budget-wrap{display:flex;align-items:center;margin-top:8px}
+.budget-input{width:140px;height:32px;border:1px solid #d9d9d9;border-radius:4px 0 0 4px;padding:0 11px;font-size:13px;outline:none;transition:border-color .2s}
+.budget-input:focus{border-color:var(--blue)}
+.budget-unit{height:32px;padding:0 12px;border:1px solid #d9d9d9;border-left:none;border-radius:0 4px 4px 0;background:#fafafa;display:flex;align-items:center;font-size:12px;color:var(--text-light)}
+
+/* Goal button */
+.goal-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:var(--blue-light);border:1px solid #91caff;border-radius:4px;color:var(--blue);font-size:13px;cursor:pointer;font-weight:500}
+.goal-btn:hover{background:#d4eefc}
+
+/* Platform tabs */
+.platform-tabs{display:flex;gap:0;margin-bottom:12px;flex-wrap:wrap}
+.platform-tab{padding:6px 14px;border:1px solid #d9d9d9;font-size:12px;cursor:pointer;background:#fff;color:var(--text-light);transition:all .15s}
+.platform-tab:first-child{border-radius:4px 0 0 4px}
+.platform-tab:last-child{border-radius:0 4px 4px 0}
+.platform-tab:not(:first-child){border-left:none}
+.platform-tab.active{background:var(--blue-light);border-color:var(--blue);color:var(--blue);font-weight:500}
+
+/* Checkbox list */
+.check-list{display:flex;gap:20px}
+.check-col{flex:1;min-width:200px}
+.check-item{display:flex;align-items:center;gap:8px;padding:4px 0}
+.check-item input[type=checkbox]{accent-color:var(--blue);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+.check-item label{font-size:12px;color:#444;cursor:pointer;flex:1}
+.check-item .expand{color:var(--text-lighter);cursor:pointer;font-size:11px}
+.check-count{font-size:11px;color:var(--text-lighter);margin-top:6px}
+
+/* Info tip */
+.info-tip{display:flex;align-items:flex-start;gap:6px;background:#fffbe6;border:1px solid #ffe58f;border-radius:4px;padding:8px 12px;font-size:12px;color:var(--text-light);margin-top:8px}
+.info-tip .tip-icon{color:var(--warning);flex-shrink:0}
+
+/* ============ MULTI-SELECT DROPDOWN ============ */
+.ms-wrap{position:relative}
+.ms-display{min-height:32px;border:1px solid #d9d9d9;border-radius:4px;padding:3px 28px 3px 8px;cursor:pointer;background:#fff;display:flex;align-items:center;flex-wrap:wrap;gap:3px;transition:border-color .2s}
+.ms-display:hover,.ms-display.open{border-color:var(--blue)}
+.ms-display.open{box-shadow:0 0 0 2px rgba(24,144,255,.2)}
+.ms-ph{color:#bbb;font-size:13px;line-height:24px}
+.ms-arrow{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--text-lighter);pointer-events:none;font-size:10px;transition:transform .2s}
+.ms-wrap.open .ms-arrow{transform:translateY(-50%) rotate(180deg)}
+.ms-tag{background:var(--blue-light);border:1px solid #91caff;border-radius:3px;padding:1px 6px;font-size:12px;color:var(--blue);display:flex;align-items:center;gap:4px}
+.ms-tag .remove{color:var(--text-lighter);cursor:pointer;font-size:10px;line-height:1}
+.ms-tag .remove:hover{color:var(--red)}
+.ms-dd{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #d9d9d9;border-radius:6px;box-shadow:0 6px 16px rgba(0,0,0,.12);z-index:500;display:none;max-height:280px;overflow:hidden}
+.ms-wrap.open .ms-dd{display:block}
+.ms-dd-search{padding:8px;border-bottom:1px solid #f0f0f0}
+.ms-dd-search input{width:100%;height:30px;border:1px solid #d9d9d9;border-radius:4px;padding:0 8px;font-size:12px;outline:none}
+.ms-dd-search input:focus{border-color:var(--blue)}
+.ms-dd-list{overflow-y:auto;max-height:220px}
+.ms-dd-item{padding:7px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .1s;font-size:12px}
+.ms-dd-item:hover{background:#f5f7fa}
+.ms-dd-item.selected{background:var(--blue-light)}
+.ms-dd-item input[type=checkbox]{accent-color:var(--blue);pointer-events:none}
+.ms-dd-item label{cursor:pointer;flex:1;pointer-events:none}
+.ms-dd-footer{padding:6px 12px;border-top:1px solid #f0f0f0;font-size:11px;color:var(--text-lighter);display:flex;justify-content:space-between}
+.ms-dd-footer .clear{color:var(--blue);cursor:pointer}
+
+/* ============ DUAL PANEL SELECTOR ============ */
+.dual-panel{display:flex;border:1px solid #d9d9d9;border-radius:4px;overflow:hidden;min-height:140px}
+.dual-left{flex:1;border-right:1px solid var(--border);display:flex;flex-direction:column}
+.dual-right{width:220px;display:flex;flex-direction:column}
+.dual-header{padding:6px 10px;background:#fafafa;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-light);display:flex;align-items:center;justify-content:space-between}
+.dual-search{padding:6px;border-bottom:1px solid var(--border)}
+.dual-search input{width:100%;height:28px;border:1px solid #d9d9d9;border-radius:4px;padding:0 8px;font-size:12px;outline:none}
+.dual-search input:focus{border-color:var(--blue)}
+.dual-list{flex:1;overflow-y:auto;min-height:60px}
+.dual-list-scroll{flex:1;overflow-y:auto;min-height:60px;max-height:200px}
+.dual-empty{display:flex;align-items:center;justify-content:center;min-height:60px;color:#bbb;font-size:12px}
+.dual-item{padding:6px 10px;font-size:12px;border-bottom:1px solid #f5f5f5;cursor:pointer;transition:background .1s}
+.dual-item:hover{background:#f5f7fa}
+.dual-item.selected{background:var(--blue-light);color:var(--blue)}
+.dual-tabs{display:flex;border-bottom:1px solid var(--border)}
+.dual-tab{flex:1;text-align:center;padding:6px;font-size:12px;cursor:pointer;color:var(--text-lighter);border-bottom:2px solid transparent}
+.dual-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.dual-actions{padding:6px 10px;display:flex;gap:10px;align-items:center;border-top:1px solid var(--border)}
+.link-btn{color:var(--blue);cursor:pointer;font-size:12px;background:none;border:none;padding:0}
+.link-btn:hover{text-decoration:underline}
+.inline-check{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text);cursor:pointer}
+.warning-box{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fffbe6;border:1px solid #ffe58f;border-radius:4px;font-size:12px;color:#ad6800;line-height:1.6}
+.warning-box>span:first-child{flex-shrink:0;font-size:14px}
+.info-box{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:var(--blue-light);border:1px solid #91d5ff;border-radius:4px;font-size:12px;color:var(--text);line-height:1.6}
+.section-tab{display:inline-block;padding:4px 12px;border:1px solid #d9d9d9;border-radius:4px;background:#fff;font-size:12px;color:var(--text-light);cursor:pointer;transition:all .15s}
+.section-tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.section-tab:hover:not(.active){border-color:var(--blue);color:var(--blue)}
+.btn-xs{padding:2px 10px;font-size:11px;height:24px;line-height:20px}
+.upload-area{display:flex;flex-direction:column}
+.upload-dashed{width:280px;height:160px;border:2px dashed #d9d9d9;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;background:#fafafa}
+.upload-dashed:hover{border-color:var(--blue);background:#f0f7ff}
+
+/* ============ CONDITIONAL SECTION ============ */
+.conditional-section{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed #e8e8e8}
+.conditional-section.visible{display:block}
+
+/* ============ EMPTY STATE ============ */
+.empty-state{text-align:center;padding:40px 20px}
+.empty-icon{font-size:40px;margin-bottom:8px;color:#d9d9d9}
+.empty-text{font-size:12px;color:#bbb}
+
+/* ============ MODAL OVERLAY ============ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:none;align-items:center;justify-content:center}
+.modal-overlay.visible{display:flex}
+.modal-box{background:#fff;border-radius:8px;box-shadow:0 12px 48px rgba(0,0,0,.2);width:720px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column}
+.modal-header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:16px;font-weight:600}
+.modal-close{cursor:pointer;font-size:18px;color:var(--text-lighter);background:none;border:none;padding:0 4px}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.modal-footer{padding:12px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+/* ============ FOOTER ============ */
+.footer-bar{position:fixed;bottom:0;left:var(--sidebar-w);right:var(--panel-w);height:56px;background:#fff;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:12px;z-index:100}
+.btn{padding:6px 20px;border-radius:4px;font-size:13px;cursor:pointer;border:1px solid;transition:all .2s;font-family:inherit}
+.btn-default{background:#fff;border-color:#d9d9d9;color:var(--text-light)}
+.btn-default:hover{border-color:var(--blue);color:var(--blue)}
+.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn-primary:hover{background:#40a9ff;border-color:#40a9ff}
+.btn-outline{background:#fff;border-color:var(--blue);color:var(--blue)}
+.btn-outline:hover{background:var(--blue-light)}
+
+/* ============ TOOLTIP ============ */
+.tooltip-wrap{position:relative;display:inline-flex}
+.tooltip-wrap .tt-content{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:#fff;font-size:11px;padding:4px 8px;border-radius:4px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;margin-bottom:4px;z-index:10}
+.tooltip-wrap:hover .tt-content{opacity:1}
+
+/* ============ AD GOAL CARD ============ */
+.goal-card{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border:1px solid #d9d9d9;border-radius:6px;cursor:pointer;transition:all .15s;background:#fff}
+.goal-card:hover{border-color:var(--blue)}
+.goal-card.selected{border-color:var(--blue);background:var(--blue-light)}
+.goal-card .goal-icon{font-size:20px}
+
+/* ============ NOTIFICATION TOAST ============ */
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12);padding:12px 20px;z-index:3000;display:flex;align-items:center;gap:8px;font-size:13px;animation:slideDown .3s ease}
+.toast.success{border-left:3px solid var(--green)}
+.toast.error{border-left:3px solid var(--red)}
+@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:1280px){
+  .right-panel{display:none}
+  .main{margin-right:0}
+  .footer-bar{right:0}
+}
+</style>
+<script src="https://beacon.cdn.qq.com/sdk/4.5.9/beacon_web.min.js"></script>
+<script>
+(function(){
+  try{
+    var beacon=new BeaconAction({
+      appkey:'0WEB06U85YBSLJNL',
+      versionCode:'1.0.0',
+      channelID:'share',
+      delay:1000,
+      sessionDuration:30*60*1000,
+      isOversea:false,
+      needReportRqdEvent:false
+    });
+    beacon.onDirectUserAction('preview_page_view',{
+      'url':location.href,
+      'referrer':document.referrer,
+      'title':document.title,
+      'sandbox_id':'a7f161c1e21c4707a06beaa9f1b29d44'
+    });
+  }catch(e){}
+})();
+</script></head>
+<body>
+
+<!-- ===== TOP NAV ===== -->
+<nav class="topnav">
+  <div class="topnav-logo">
+    <svg viewBox="0 0 28 22"><rect x="0" y="5" width="6" height="12" rx="1" fill="#4688f0"/><rect x="8" y="1" width="6" height="20" rx="1" fill="#4688f0"/><rect x="16" y="6" width="6" height="10" rx="1" fill="#4688f0"/></svg>
+    <span>XP</span>
+  </div>
+  <div class="topnav-menu">
+    <div class="topnav-item">看板</div>
+    <div class="topnav-item active">推广<span class="badge"></span></div>
+    <div class="topnav-item">素材</div>
+    <div class="topnav-item">流量池</div>
+    <div class="topnav-item">管理</div>
+    <div class="topnav-item">工具</div>
+    <div class="topnav-item">AI助手</div>
+    <div class="topnav-item">投放诊断</div>
+  </div>
+  <div class="topnav-right">
+    <span class="icon-btn">🔔</span>
+    <span class="icon-btn">⊞</span>
+    <span class="icon-btn">❓</span>
+    <span class="lang">⚙ 中文</span>
+    <div class="user-avatar">W</div>
+    <span style="font-size:11px;line-height:1.3">Warning<br>qq54...</span>
+  </div>
+</nav>
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-item active" data-section="basic" onclick="scrollToSection('basic')">
+    <span class="dot"></span>基础设置
+  </div>
+  <div class="sidebar-item" data-section="campaign" onclick="scrollToSection('campaign')">
+    广告系列
+  </div>
+  <div class="sidebar-item" data-section="content" onclick="scrollToSection('content')">
+    投放内容
+  </div>
+  <div class="sidebar-item" data-section="placement" onclick="scrollToSection('placement')">
+    版位
+  </div>
+  <div class="sidebar-item" data-section="region" onclick="scrollToSection('region')">
+    地区组
+  </div>
+  <div class="sidebar-item" data-section="targeting" onclick="scrollToSection('targeting')">
+    定向包
+  </div>
+  <div class="sidebar-item" data-section="bidding" onclick="scrollToSection('bidding')">
+    出价和预算
+  </div>
+  <div class="sidebar-item" data-section="creative-settings" onclick="scrollToSection('creative-settings')">
+    创意设置
+  </div>
+  <div class="sidebar-item" data-section="creative-group" onclick="scrollToSection('creative-group')">
+    创意组
+  </div>
+</aside>
+
+<!-- ===== RIGHT PANEL ===== -->
+<aside class="right-panel" id="rightPanel">
+  <div class="rp-header">
+    <div class="rp-title">
+      <div class="rp-meta-icon">f</div>
+      <span>Meta</span>
+    </div>
+    <span class="rp-edit" onclick="showToast('编辑配置','success')">编辑</span>
+  </div>
+  <div class="rp-count">已选客户数量: <strong id="rpAccountCount">1</strong></div>
+  <table class="rp-table">
+    <thead><tr><th>属性</th><th>数量</th><th>拆分规则</th></tr></thead>
+    <tbody>
+      <tr><td>地区组</td><td>1</td><td onclick="showToast('拆分规则: 广告组','success')">广告组</td></tr>
+      <tr><td>定向包</td><td>1</td><td onclick="showToast('拆分规则: 广告组','success')">广告组</td></tr>
+      <tr><td>出价和预算</td><td>1</td><td onclick="showToast('拆分规则: 广告组','success')">广告组</td></tr>
+      <tr><td>创意组</td><td>1</td><td onclick="showToast('拆分规则: 广告组','success')">广告组</td></tr>
+    </tbody>
+  </table>
+</aside>
+
+<!-- ===== MAIN CONTENT ===== -->
+<main class="main" id="mainContent">
+<div class="main-inner">
+
+  <!-- ===== 1. 基础设置 ===== -->
+  <div class="section-card" id="basic">
+    <div class="section-header" onclick="toggleSection('basic')">
+      <span class="section-title"><span class="collapse-icon">▾</span> 基础设置</span>
+      <div class="section-actions"><span class="section-edit" onclick="event.stopPropagation();showToast('编辑基础设置','success')">编辑</span></div>
+    </div>
+    <div class="section-body">
+      <!-- 广告目标 -->
+      <div class="form-row">
+        <label class="form-label">广告目标</label>
+        <div class="form-control">
+          <div class="goal-btn">
+            <span>📱</span> 应用推广
+          </div>
+        </div>
+      </div>
+      <!-- 广告账户 -->
+      <div class="form-row">
+        <label class="form-label required">广告账户</label>
+        <div class="form-control">
+          <div class="ms-wrap" id="msAccount">
+            <div class="ms-display" id="msAccountDisp" onclick="toggleMS('msAccount')">
+              <span class="ms-ph" id="msAccountPh">请选择广告客户</span>
+              <span class="ms-arrow">▾</span>
+            </div>
+            <div class="ms-dd">
+              <div class="ms-dd-search"><input type="text" placeholder="搜索..." oninput="filterMS('msAccount',this.value)"></div>
+              <div class="ms-dd-list" id="msAccountList">
+                <div class="ms-dd-item" onclick="toggleMSCheck(this,'msAccount','账户 A - 001')"><input type="checkbox"><label>账户 A - 001</label></div>
+                <div class="ms-dd-item" onclick="toggleMSCheck(this,'msAccount','账户 B - 002')"><input type="checkbox"><label>账户 B - 002</label></div>
+                <div class="ms-dd-item" onclick="toggleMSCheck(this,'msAccount','账户 C - 003')"><input type="checkbox"><label>账户 C - 003</label></div>
+                <div class="ms-dd-item" onclick="toggleMSCheck(this,'msAccount','账户 D - 海外')"><input type="checkbox"><label>账户 D - 海外</label></div>
+                <div class="ms-dd-item" onclick="toggleMSCheck(this,'msAccount','账户 E - 高级')"><input type="checkbox"><label>账户 E - 高级</label></div>
+              </div>
+              <div class="ms-dd-footer">已选 <span id="msAccountCount">0</span> 个 <button class="clear" onclick="clearMS('msAccount')">清除</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- XMP产品 -->
+      <div class="form-row">
+        <label class="form-label">XMP 产品 <span class="tip" title="关联的XMP产品">ⓘ</span></label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select" id="xmpProduct" onchange="this.classList.toggle('has-value',!!this.value)">
+              <option value="">请选择</option><option>三消游戏 - Candy Crush Clone</option><option>SLG - 王国纪元</option><option>卡牌 - 炉石传说</option>
+            </select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 2. 广告系列 ===== -->
+  <div class="section-card" id="campaign">
+    <div class="section-header" onclick="toggleSection('campaign')">
+      <span class="section-title"><span class="collapse-icon">▾</span> 广告系列</span>
+      <div class="section-status"><span class="status-done">✓ 已完成</span></div>
+    </div>
+    <div class="section-body">
+      <!-- 广告系列名称 -->
+      <div class="form-row">
+        <label class="form-label required">广告系列名称</label>
+        <div class="form-control">
+          <input type="text" class="form-input" placeholder="请输入广告系列名称" id="campaignName" oninput="this.classList.toggle('has-value',!!this.value)">
+          <div class="name-hints">
+            <span class="name-tag" onclick="insertVar('campaignName','{系统用户名}')">系统用户名</span>
+            <span class="name-tag" onclick="insertVar('campaignName','{账户名}')">账户名</span>
+            <span class="name-tag" onclick="insertVar('campaignName','{账户备注名}')">账户备注名</span>
+            <span class="name-tag" onclick="insertVar('campaignName','{地区组名称}')">地区组名称</span>
+            <span class="name-tag" onclick="insertVar('campaignName','{定向包名称}')">定向包名称</span>
+            <span class="name-expand" onclick="toggleExtraHints()" id="hintExpandBtn">展开 ▾</span>
+          </div>
+          <div id="extraHints" style="display:none;margin-top:6px">
+            <div class="name-hints">
+              <span class="name-tag" onclick="insertVar('campaignName','{广告系列ID}')">广告系列ID</span>
+              <span class="name-tag" onclick="insertVar('campaignName','{创建日期}')">创建日期</span>
+              <span class="name-tag" onclick="insertVar('campaignName','{目标类型}')">目标类型</span>
+              <span class="name-tag" onclick="insertVar('campaignName','{产品名称}')">产品名称</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 广告系列状态 -->
+      <div class="form-row">
+        <label class="form-label">广告系列状态</label>
+        <div class="form-control">
+          <div class="toggle-row">
+            <div class="switch on" id="switchStatus" onclick="toggleSwitch('switchStatus','statusLabel','开启','关闭')"></div>
+            <span class="toggle-label" id="statusLabel">开启</span>
+          </div>
+        </div>
+      </div>
+      <!-- 特殊广告类别 -->
+      <div class="form-row">
+        <label class="form-label">特殊广告类别</label>
+        <div class="form-control">
+          <div class="ms-wrap" id="msSpecialCat">
+            <div class="ms-display" id="msSpecialCatDisp" onclick="toggleMS('msSpecialCat')">
+              <span class="ms-ph" id="msSpecialCatPh">请选择</span>
+              <span class="ms-arrow">▾</span>
+            </div>
+            <div class="ms-dd">
+              <div class="ms-dd-search"><input type="text" placeholder="请输入" oninput="filterMS('msSpecialCat',this.value)"></div>
+              <div class="ms-dd-list" id="msSpecialCatList">
+                <div class="ms-dd-item" onclick="toggleMSCheck(this,'msSpecialCat','金融产品和服务')"><input type="checkbox"><label>金融产品和服务（旧称"信贷"）</label></div>
+                <div class="ms-dd-item" onclick="toggleMSCheck(this,'msSpecialCat','就业')"><input type="checkbox"><label>就业</label></div>
+                <div class="ms-dd-item" onclick="toggleMSCheck(this,'msSpecialCat','住房')"><input type="checkbox"><label>住房</label></div>
+                <div class="ms-dd-item" onclick="toggleMSCheck(this,'msSpecialCat','社会议题、选举或政治')"><input type="checkbox"><label>社会议题、选举或政治</label></div>
+              </div>
+              <div class="ms-dd-footer">已选 <span id="msSpecialCatCount">0</span> 个 <button class="clear" onclick="clearMS('msSpecialCat')">清除</button></div>
+            </div>
+          </div>
+          <!-- 特殊广告地区 - 条件显示 -->
+          <div class="conditional-section" id="specialRegionSection">
+            <div class="form-row" style="margin-bottom:0">
+              <label class="form-label required">特殊广告地区</label>
+              <div class="form-control">
+                <div class="dual-panel">
+                  <div class="dual-left">
+                    <div class="dual-header">名称 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 操作</div>
+                    <div class="dual-search"><input type="text" placeholder="🔍 搜索..."></div>
+                    <div class="dual-list" id="specialRegionLeft">
+                      <div class="dual-item" onclick="selectDualItem(this,'specialRegionLeft','specialRegionRight','美国')">美国</div>
+                      <div class="dual-item" onclick="selectDualItem(this,'specialRegionLeft','specialRegionRight','加拿大')">加拿大</div>
+                      <div class="dual-item" onclick="selectDualItem(this,'specialRegionLeft','specialRegionRight','英国')">英国</div>
+                      <div class="dual-item" onclick="selectDualItem(this,'specialRegionLeft','specialRegionRight','澳大利亚')">澳大利亚</div>
+                    </div>
+                  </div>
+                  <div class="dual-right">
+                    <div class="dual-header">
+                      已选
+                      <div><button class="link-btn" onclick="showToast('批量导入','success')">批量导入</button> <button class="link-btn" onclick="clearDualRight()">清除</button></div>
+                    </div>
+                    <div class="dual-tabs">
+                      <div class="dual-tab active" id="dualTabInclude">定向(0)</div>
+                      <div class="dual-tab" id="dualTabExclude" onclick="switchDualTab(this,'dualTabInclude')">排除(0)</div>
+                    </div>
+                    <div class="dual-list" id="specialRegionRight">
+                      <div class="dual-empty" id="specialRegionEmpty">暂无</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- iOS 14+ -->
+      <div class="form-row">
+        <label class="form-label">iOS 14+ 广告系列</label>
+        <div class="form-control">
+          <div class="toggle-row">
+            <div class="switch" id="switchiOS14" onclick="toggleiOS14()"></div>
+          </div>
+          <div class="conditional-section" id="ios14Detail">
+            <div style="padding:10px;background:#f5f7fa;border-radius:4px;font-size:12px;color:var(--text-light)">
+              启用 iOS 14+ 广告系列后，广告将仅面向 iOS 14.0 及以上版本设备的用户投放。此设置会影响归因窗口和优化事件的报告方式。
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- CBO -->
+      <div class="form-row">
+        <label class="form-label">智能型广告系列<br>预算优化 <span class="tip" title="Campaign Budget Optimization">ⓘ</span></label>
+        <div class="form-control">
+          <div class="toggle-row">
+            <div class="switch on" id="switchCBO" onclick="toggleSwitch('switchCBO')"></div>
+            <span class="toggle-label">开启后可设置广告系列预算</span>
+          </div>
+        </div>
+      </div>
+      <!-- 广告系列预算 -->
+      <div class="form-row">
+        <label class="form-label">广告系列预算</label>
+        <div class="form-control">
+          <div class="btn-grp">
+            <button class="btn-tab active" data-budget="daily" onclick="selectBudget(this)">单日预算</button>
+            <button class="btn-tab" data-budget="total" onclick="selectBudget(this)">总预算</button>
+          </div>
+          <div class="budget-wrap">
+            <input type="number" class="budget-input" placeholder="请输入" id="budgetValue" oninput="this.classList.toggle('has-value',!!this.value)">
+            <div class="budget-unit">USD</div>
+          </div>
+        </div>
+      </div>
+      <!-- 竞价策略 -->
+      <div class="form-row">
+        <label class="form-label">广告系列竞价策略</label>
+        <div class="form-control">
+          <div class="strategy-tabs">
+            <button class="strategy-tab active" onclick="selectStrategy(this)">最高数量</button>
+            <button class="strategy-tab" onclick="selectStrategy(this)">单次成效费用目标</button>
+            <button class="strategy-tab" onclick="selectStrategy(this)">竞价上限</button>
+            <button class="strategy-tab" onclick="selectStrategy(this)">广告花费回报目标</button>
+          </div>
+        </div>
+      </div>
+      <!-- 投放时段 -->
+      <div class="form-row">
+        <label class="form-label">投放时段</label>
+        <div class="form-control">
+          <div class="btn-grp">
+            <button class="btn-tab active" onclick="selectBtnGrp(this)">全天投放广告</button>
+            <button class="btn-tab" onclick="selectBtnGrp(this)">分时间段投放</button>
+          </div>
+        </div>
+      </div>
+      <!-- 投放类型 -->
+      <div class="form-row">
+        <label class="form-label">投放类型</label>
+        <div class="form-control">
+          <div class="btn-grp">
+            <button class="btn-tab active" onclick="selectBtnGrp(this)">匀速</button>
+            <button class="btn-tab" id="pacingAccelerate" onclick="selectBtnGrp(this)" style="display:none">加速</button>
+          </div>
+        </div>
+      </div>
+      <!-- 花费限额（仅在单日预算时显示） -->
+      <div class="form-row" id="spendLimitRow">
+        <label class="form-label">广告系列花费<br>限额 <span class="tip" title="设置广告系列的总花费上限">ⓘ</span></label>
+        <div class="form-control">
+          <div class="btn-grp">
+            <button class="btn-tab active" onclick="selectSpendLimit(this)">不限</button>
+            <button class="btn-tab" onclick="selectSpendLimit(this)">自定义</button>
+          </div>
+          <div id="spendLimitCustom" style="display:none;margin-top:8px">
+            <div class="budget-wrap">
+              <input type="number" class="budget-input" placeholder="请输入金额">
+              <div class="budget-unit">USD</div>
+            </div>
+          </div>
+          <div class="info-tip">
+            <span class="tip-icon">ⓘ</span>
+            花费限额不是预算。如需设置广告系列预算请开启智能型广告系列预算优化（CBO）
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 3. 投放内容 ===== -->
+  <div class="section-card" id="content">
+    <div class="section-header" onclick="toggleSection('content')">
+      <span class="section-title"><span class="collapse-icon">▾</span> 投放内容</span>
+      <div class="section-status">待填写</div>
+    </div>
+    <div class="section-body">
+      <!-- 广告组名称 -->
+      <div class="form-row">
+        <label class="form-label required">广告组名称</label>
+        <div class="form-control">
+          <input type="text" class="form-input" placeholder="{系统用户名}_[账户名]_[账户备注名]" id="adGroupName" oninput="this.classList.toggle('has-value',!!this.value)">
+          <div class="name-hints">
+            <span class="name-tag" onclick="insertVar('adGroupName','{系统用户名}')">系统用户名</span>
+            <span class="name-tag" onclick="insertVar('adGroupName','{账户名}')">账户名</span>
+            <span class="name-tag" onclick="insertVar('adGroupName','{账户备注名}')">账户备注名</span>
+            <span class="name-tag" onclick="insertVar('adGroupName','{地区组名称}')">地区组名称</span>
+            <span class="name-tag" onclick="insertVar('adGroupName','{定向包名称}')">定向包名称</span>
+            <span class="name-expand" onclick="toggleAdGroupHints()" id="adGroupHintExpandBtn">展开 ▾</span>
+          </div>
+          <div id="adGroupExtraHints" style="display:none;margin-top:6px">
+            <div class="name-hints">
+              <span class="name-tag" onclick="insertVar('adGroupName','{广告组ID}')">广告组ID</span>
+              <span class="name-tag" onclick="insertVar('adGroupName','{创建日期}')">创建日期</span>
+              <span class="name-tag" onclick="insertVar('adGroupName','{产品名称}')">产品名称</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 广告组状态 -->
+      <div class="form-row">
+        <label class="form-label">广告组状态</label>
+        <div class="form-control">
+          <div class="toggle-row">
+            <div class="switch on" id="switchAdGroupStatus" onclick="toggleSwitch('switchAdGroupStatus','adGroupStatusLabel','开启','关闭')"></div>
+            <span class="toggle-label" id="adGroupStatusLabel">开启</span>
+          </div>
+        </div>
+      </div>
+      <!-- 移动应用商店 -->
+      <div class="form-row">
+        <label class="form-label">移动应用商店</label>
+        <div class="form-control">
+          <div class="btn-grp">
+            <button class="btn-tab active" onclick="selectAppStore(this)">App Store</button>
+          </div>
+        </div>
+      </div>
+      <!-- 应用包 -->
+      <div class="form-row">
+        <label class="form-label required">应用包</label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select" id="appPackage" onchange="this.classList.toggle('has-value',!!this.value)">
+              <option value="">请选择</option>
+              <option value="app1">com.example.app1</option>
+              <option value="app2">com.example.app2</option>
+            </select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 4. 版位 ===== -->
+  <div class="section-card" id="placement">
+    <div class="section-header" onclick="toggleSection('placement')">
+      <span class="section-title"><span class="collapse-icon">▾</span> 版位</span>
+    </div>
+    <div class="section-body">
+      <div class="form-row">
+        <label class="form-label">版位设置</label>
+        <div class="form-control">
+          <div class="btn-grp">
+            <button class="btn-tab active" onclick="selectPlacement(this,'auto')">进阶版面型版位</button>
+            <button class="btn-tab" onclick="selectPlacement(this,'manual')">手动版位</button>
+          </div>
+        </div>
+      </div>
+      <div class="conditional-section" id="manualPlacementSection">
+        <div class="form-row">
+          <label class="form-label required">平台和版位</label>
+          <div class="form-control">
+            <div class="platform-tabs">
+              <button class="platform-tab active" onclick="selectPlatform(this)">Facebook</button>
+              <button class="platform-tab" onclick="selectPlatform(this)">Messenger</button>
+              <button class="platform-tab" onclick="selectPlatform(this)">Instagram</button>
+              <button class="platform-tab" onclick="selectPlatform(this)">Audience Network</button>
+              <button class="platform-tab" onclick="selectPlatform(this)">Threads</button>
+            </div>
+            <div class="check-list">
+              <div class="check-col">
+                <div class="check-item"><input type="checkbox" id="pd1" checked onchange="updatePlacementCount()"><label for="pd1">动态</label><span class="expand">›</span></div>
+                <div class="check-item"><input type="checkbox" id="pd2" checked onchange="updatePlacementCount()"><label for="pd2">短拍照 Reels</label><span class="expand">›</span></div>
+                <div class="check-item"><input type="checkbox" id="pd3" checked onchange="updatePlacementCount()"><label for="pd3">视频版 Reels 插播广告</label><span class="expand">›</span></div>
+                <div class="check-item"><input type="checkbox" id="pd4" checked onchange="updatePlacementCount()"><label for="pd4">搜索结果</label><span class="expand">›</span></div>
+                <div class="check-item"><input type="checkbox" id="pd5" checked onchange="updatePlacementCount()"><label for="pd5">应用内网站</label><span class="expand">›</span></div>
+                <div class="check-item"><input type="checkbox" id="pd6" onchange="updatePlacementCount()"><label for="pd6">赞助消息</label></div>
+              </div>
+              <div class="check-col">
+                <div class="check-item"><input type="checkbox" id="pd7" checked onchange="updatePlacementCount()"><label for="pd7">Instagram 主页动态</label></div>
+                <div class="check-item"><input type="checkbox" id="pd8" checked onchange="updatePlacementCount()"><label for="pd8">Facebook Marketplace</label></div>
+                <div class="check-item"><input type="checkbox" id="pd9" checked onchange="updatePlacementCount()"><label for="pd9">Instagram 发现</label></div>
+                <div class="check-item"><input type="checkbox" id="pd10" checked onchange="updatePlacementCount()"><label for="pd10">Instagram 发现首页</label></div>
+                <div class="check-item"><input type="checkbox" id="pd11" checked onchange="updatePlacementCount()"><label for="pd11">Messenger 收件箱</label></div>
+                <div class="check-item"><input type="checkbox" id="pd12" onchange="updatePlacementCount()"><label for="pd12">发现 Facebook 商家</label></div>
+              </div>
+            </div>
+            <div class="check-count" id="placementCount">已选择 10 个版位</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 5. 地区组 ===== -->
+  <div class="section-card" id="region">
+    <div class="section-header" onclick="toggleSection('region')">
+      <span class="section-title"><span class="collapse-icon">▾</span> 地区组</span>
+      <div class="section-actions">
+        <span class="section-tab active">地区组1</span>
+        <span style="font-size:12px;color:var(--text-lighter);margin-left:8px">批量操作 ▾</span>
+        <span class="link-btn" style="font-size:12px;margin-left:8px">清空</span>
+        <button class="btn btn-primary btn-xs" style="margin-left:auto">+ 新增</button>
+        <span style="font-size:12px;color:var(--text-lighter);margin-left:4px">1/30</span>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="form-row">
+        <label class="form-label">选择已有地区组</label>
+        <div class="form-control">
+          <label class="inline-check"><input type="checkbox"> 使用已保存的地区组模板</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">地区</label>
+        <div class="form-control">
+          <div class="dual-panel">
+            <div class="dual-left">
+              <input type="text" class="dual-search" placeholder="搜索">
+              <div class="dual-list-scroll">
+                <div class="dual-item" onclick="addRegionItem(this,'iTunes 应用商店开放国家/地区')">iTunes 应用商店开放国家/地区</div>
+                <div class="dual-item" onclick="addRegionItem(this,'东盟自由贸易区')">东盟自由贸易区</div>
+                <div class="dual-item" onclick="addRegionItem(this,'Tucson AZ')">Tucson AZ</div>
+                <div class="dual-item" onclick="addRegionItem(this,'Fairbanks AK')">Fairbanks AK</div>
+                <div class="dual-item" onclick="addRegionItem(this,'中国香港')">中国香港</div>
+                <div class="dual-item" onclick="addRegionItem(this,'中国台湾')">中国台湾</div>
+              </div>
+            </div>
+            <div class="dual-right">
+              <div class="dual-tabs">
+                <div class="dual-tab active" onclick="switchDualTab2(this,'include')">定向(<span id="regionIncludeCount">0</span>)</div>
+                <div class="dual-tab" onclick="switchDualTab2(this,'exclude')">排除(<span id="regionExcludeCount">0</span>)</div>
+              </div>
+              <div class="dual-list" id="regionRightList"></div>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button class="btn btn-default btn-xs">批量导入</button>
+                <button class="btn btn-default btn-xs" onclick="clearRegionRight()">清除</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-control" style="background:#f5f7fa;padding:10px 12px;border-radius:4px;font-size:12px;color:var(--text-light)">
+          对于任何定位在欧盟地区的广告组，<br>请分别在广告组内填写相关的受益方和赞助方信息。
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">在什么地区投放<br>金融产品类广告</label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">受益方<br>(台湾地区)</label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">赞助方<br>(台湾地区)</label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">受益方<br>(澳大利亚)</label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">赞助方<br>(澳大利亚)</label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">受益方<br>(新加坡)</label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">赞助方<br>(新加坡)</label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">受益方<br>(泰国或巴西)</label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">赞助方<br>(泰国或巴西)</label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">受益方<br>(欧盟)</label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">赞助方<br>(欧盟)</label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">标签</label>
+        <div class="form-control">
+          <div class="form-select-wrap">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">地区组名称</label>
+        <div class="form-control">
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="text" class="form-input" style="flex:1" value="地区组1" maxlength="50" id="regionGroupName">
+            <span style="font-size:12px;color:var(--text-lighter);white-space:nowrap" id="regionNameCount">4/50</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-control">
+          <button class="btn btn-primary" onclick="showToast('地区组已保存','success')">保存为地区组</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 6. 定向包 ===== -->
+  <div class="section-card" id="targeting">
+    <div class="section-header" onclick="toggleSection('targeting')">
+      <span class="section-title"><span class="collapse-icon">▾</span> 定向包</span>
+      <div class="section-actions">
+        <span class="section-tab active">定向包1</span>
+        <span style="font-size:12px;color:var(--text-lighter);margin-left:8px">批量操作 ▾</span>
+        <span class="link-btn" style="font-size:12px;margin-left:8px">清空</span>
+        <button class="btn btn-primary btn-xs" style="margin-left:auto">+ 新增</button>
+        <span style="font-size:12px;color:var(--text-lighter);margin-left:4px">1/30</span>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="form-row">
+        <label class="form-label">选择已有定向包</label>
+        <div class="form-control">
+          <label class="inline-check"><input type="checkbox"> 使用已保存的定向包</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">进阶赋能型受众</label>
+        <div class="form-control">
+          <div class="toggle-row">
+            <div class="switch on" id="switchAdvAudience" onclick="toggleAdvAudience()"></div>
+            <span class="toggle-label">开启后广告覆盖更广泛的目标受众</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">自定义受众</label>
+        <div class="form-control">
+          <div class="btn-grp">
+            <button class="btn-tab active" onclick="selectCustomAudience(this)">不限</button>
+            <button class="btn-tab" onclick="selectCustomAudience(this)">自定义</button>
+          </div>
+          <div class="conditional-section" id="customAudienceSection">
+            <div class="dual-panel">
+              <div class="dual-left">
+                <div class="dual-header" style="gap:0">
+                  <span class="dual-tab active" onclick="switchAudienceSource(this,'all')" style="cursor:pointer;border-bottom:none;padding:0 8px">全部受众</span>
+                  <span class="dual-tab" onclick="switchAudienceSource(this,'lookalike')" style="cursor:pointer;border-bottom:none;padding:0 8px">类似受众</span>
+                  <span class="dual-tab" onclick="switchAudienceSource(this,'custom')" style="cursor:pointer;border-bottom:none;padding:0 8px">自定义受众</span>
+                </div>
+                <div class="dual-search" style="display:flex;align-items:center;gap:6px">
+                  <input type="text" placeholder="搜索" style="flex:1">
+                  <button class="btn btn-default btn-xs" onclick="showToast('已同步受众数据','success')" style="height:28px;line-height:28px;padding:0 10px;flex-shrink:0">同步 ▾</button>
+                </div>
+                <div class="dual-list">
+                  <div class="dual-empty">暂无数据</div>
+                </div>
+              </div>
+              <div class="dual-right">
+                <div class="dual-header">
+                  <div style="display:flex;gap:0">
+                    <span class="dual-tab active" onclick="switchAudienceDualTab(this,'audInclude')" style="cursor:pointer;border-bottom:none;padding:0 8px">定向(0)</span>
+                    <span class="dual-tab" onclick="switchAudienceDualTab(this,'audExclude')" style="cursor:pointer;border-bottom:none;padding:0 8px">排除(0)</span>
+                  </div>
+                  <button class="link-btn" onclick="clearAudienceRight()">清除</button>
+                </div>
+                <div class="dual-list">
+                  <div class="dual-empty">暂无数据</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 进阶赋能型受众 ON → 显示最低年龄限制 + 年龄建议 -->
+      <div class="form-row" id="rowMinAge">
+        <label class="form-label">最低年龄限制 <span style="color:var(--danger)">*</span></label>
+        <div class="form-control">
+          <div class="form-select-wrap" style="width:100px">
+            <select class="form-select"><option value="18" selected>18</option><option value="13">13</option><option value="21">21</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row" id="rowAgeSuggestion">
+        <label class="form-label">年龄建议</label>
+        <div class="form-control">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="form-select-wrap" style="width:100px">
+              <select class="form-select"><option value="18" selected>18</option></select>
+              <span class="form-select-arrow">▾</span>
+            </div>
+            <span style="color:var(--text-light)">-</span>
+            <div class="form-select-wrap" style="width:100px">
+              <select class="form-select"><option value="65" selected>65+</option></select>
+              <span class="form-select-arrow">▾</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 进阶赋能型受众 OFF → 只显示年龄 -->
+      <div class="form-row" id="rowAgeOnly" style="display:none">
+        <label class="form-label">年龄 <span style="color:var(--danger)">*</span></label>
+        <div class="form-control">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="form-select-wrap" style="width:100px">
+              <select class="form-select"><option value="18" selected>18</option></select>
+              <span class="form-select-arrow">▾</span>
+            </div>
+            <span style="color:var(--text-light)">-</span>
+            <div class="form-select-wrap" style="width:100px">
+              <select class="form-select"><option value="65" selected>65+</option></select>
+              <span class="form-select-arrow">▾</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">性别</label>
+        <div class="form-control">
+          <div class="btn-grp">
+            <button class="btn-tab active" onclick="selectBtnGrp(this)">不限</button>
+            <button class="btn-tab" onclick="selectBtnGrp(this)">男性</button>
+            <button class="btn-tab" onclick="selectBtnGrp(this)">女性</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">细分定位</label>
+        <div class="form-control">
+          <div class="btn-grp">
+            <button class="btn-tab active" onclick="selectBtnGrp(this)">不限</button>
+            <button class="btn-tab" onclick="selectBtnGrp(this)">自定义</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">语言</label>
+        <div class="form-control">
+          <div class="form-select-wrap" style="width:200px">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">包含的设备</label>
+        <div class="form-control">
+          <div class="form-select-wrap" style="width:200px">
+            <select class="form-select"><option value="" selected>已选 2个</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">排除的设备</label>
+        <div class="form-control">
+          <div class="form-select-wrap" style="width:200px">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">操作系统版本</label>
+        <div class="form-control">
+          <div class="form-select-wrap" style="width:260px">
+            <select class="form-select"><option value="" selected>2.0 Edgar - none</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">仅在连接 Wi-Fi 时</label>
+        <div class="form-control">
+          <div class="toggle-row">
+            <div class="switch" id="switchWifiOnly" onclick="toggleSwitch('switchWifiOnly')"></div>
+            <span class="toggle-label">开启后仅在Wi-Fi环境下展示广告</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">标签</label>
+        <div class="form-control">
+          <div class="form-select-wrap" style="width:200px">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">定向包名称</label>
+        <div class="form-control">
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="text" class="form-input" style="flex:1" value="定向包1" maxlength="50" id="targetingName">
+            <span style="font-size:12px;color:var(--text-lighter);white-space:nowrap" id="targetingNameCount">5/50</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-control">
+          <button class="btn btn-primary" onclick="showToast('定向包已保存','success')">保存为定向包</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 7. 出价和预算 ===== -->
+  <div class="section-card" id="bidding">
+    <div class="section-header" onclick="toggleSection('bidding')">
+      <span class="section-title"><span class="collapse-icon">▾</span> 出价和预算</span>
+    </div>
+    <div class="section-body">
+      <div class="form-row">
+        <label class="form-label">成效目标</label>
+        <div class="form-control">
+          <div class="btn-grp">
+            <button class="btn-tab active" onclick="selectOptimizationGoal(this)">应用安装量最大化</button>
+            <button class="btn-tab" onclick="selectOptimizationGoal(this)">应用事件数量最大化</button>
+            <button class="btn-tab" onclick="selectOptimizationGoal(this)">链接点击最大化</button>
+          </div>
+        </div>
+      </div>
+      <!-- 应用事件数量最大化 → 显示 -->
+      <div class="form-row" id="rowAppEvent" style="display:none">
+        <label class="form-label">应用事件 <span style="color:var(--danger)">*</span></label>
+        <div class="form-control">
+          <div class="form-select-wrap" style="width:260px">
+            <select class="form-select"><option value="">请选择推广应用</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">竞价控制额 <span style="color:var(--danger)">*</span></label>
+        <div class="form-control">
+          <div class="budget-wrap">
+            <input type="number" class="budget-input" placeholder="请输入">
+            <div class="budget-unit">USD</div>
+          </div>
+        </div>
+      </div>
+      <!-- 链接点击最大化 → 隐藏归因设置 -->
+      <div class="form-row" id="rowAttribution">
+        <label class="form-label">归因设置 <span style="color:var(--danger)">*</span></label>
+        <div class="form-control">
+          <div class="form-select-wrap" style="width:240px">
+            <select class="form-select" id="attributionSelect">
+              <option value="click1d_view1d" selected>点击后1天内，浏览后1天内</option>
+              <option value="click7d">点击后7天内</option>
+            </select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row" id="rowBilling">
+        <label class="form-label">计费方式</label>
+        <div class="form-control">
+          <div class="btn-grp" id="billingBtns">
+            <button class="btn-tab active" onclick="selectBtnGrp(this)">展示次数</button>
+            <button class="btn-tab" onclick="selectBtnGrp(this)" id="billCPC">链接点击量(CPC)</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">排期</label>
+        <div class="form-control">
+          <div class="btn-grp">
+            <button class="btn-tab active" onclick="selectBtnGrp(this)">自定义</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label required">开始时间</label>
+        <div class="form-control">
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="date" class="form-input" style="width:160px" value="2026-06-23">
+            <div class="form-select-wrap" style="width:120px">
+              <select class="form-select"><option selected>15:11</option></select>
+              <span class="form-select-arrow">▾</span>
+            </div>
+            <div class="form-select-wrap" style="width:160px">
+              <select class="form-select"><option selected>Asia/Shanghai</option></select>
+              <span class="form-select-arrow">▾</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label required">结束时间</label>
+        <div class="form-control">
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="date" class="form-input" style="width:160px" placeholder="选择日期">
+            <div class="form-select-wrap" style="width:120px">
+              <select class="form-select"><option value="">选择时间</option></select>
+              <span class="form-select-arrow">▾</span>
+            </div>
+            <div class="form-select-wrap" style="width:160px">
+              <select class="form-select"><option selected>Asia/Shanghai</option></select>
+              <span class="form-select-arrow">▾</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">广告组花费限额</label>
+        <div class="form-control">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="budget-wrap">
+              <input type="number" class="budget-input" placeholder="下限">
+              <div class="budget-unit">USD</div>
+            </div>
+            <span style="color:var(--text-light)">-</span>
+            <div class="budget-wrap">
+              <input type="number" class="budget-input" placeholder="上限">
+              <div class="budget-unit">USD</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 8. 创意设置 ===== -->
+  <div class="section-card" id="creative-settings">
+    <div class="section-header" onclick="toggleSection('creative-settings')">
+      <span class="section-title"><span class="collapse-icon">▾</span> 创意设置</span>
+    </div>
+    <div class="section-body">
+      <div class="form-row">
+        <label class="form-label">广告名称</label>
+        <div class="form-control">
+          <input type="text" class="form-input" placeholder="广告名称" id="creativeName" oninput="this.classList.toggle('has-value',!!this.value)">
+          <div class="name-hints">
+            <span class="name-tag" onclick="insertVar('creativeName','{首个素材名称}')">首个素材名称</span>
+            <span class="name-tag" onclick="insertVar('creativeName','{首个素材名称(含格式)}')">首个素材名称(含格式)</span>
+            <span class="name-tag" onclick="insertVar('creativeName','{系统用户名}')">系统用户名</span>
+            <span class="name-tag" onclick="insertVar('creativeName','{账户名}')">账户名</span>
+            <span class="name-tag" onclick="insertVar('creativeName','{账户备注名}')">账户备注名</span>
+            <span class="name-expand" onclick="toggleCreativeHints()" id="creativeHintExpandBtn">展开 ▾</span>
+          </div>
+          <div id="creativeExtraHints" style="display:none;margin-top:6px">
+            <div class="name-hints">
+              <span class="name-tag" onclick="insertVar('creativeName','{日期}')">日期</span>
+              <span class="name-tag" onclick="insertVar('creativeName','{渠道名称}')">渠道名称</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">广告状态</label>
+        <div class="form-control">
+          <div class="toggle-row">
+            <div class="switch on" id="switchCreativeStatus" onclick="toggleSwitch('switchCreativeStatus','creativeStatusLabel','开启','关闭')"></div>
+            <span class="toggle-label" id="creativeStatusLabel">开启</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-control">
+          <div class="warning-box">
+            <span>⚠</span>
+            <span>若您的主页没有全部授权，主页将默认选中"全部主页"，系统将为您随机选择投放帖子对应主页；若您希望控制投放主页，请先前往授权页完成主页授权。</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">主页类型</label>
+        <div class="form-control">
+          <div class="btn-grp">
+            <button class="btn-tab active" onclick="selectBtnGrp(this)">全部主页</button>
+            <button class="btn-tab" onclick="selectBtnGrp(this)">个人号主页</button>
+            <button class="btn-tab" onclick="selectBtnGrp(this)">广告账户主页</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label required">Facebook 公共主页</label>
+        <div class="form-control">
+          <div class="form-select-wrap" style="width:320px">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+          <a href="#" class="link-btn" style="margin-top:4px;display:inline-block" onclick="event.preventDefault();showToast('正在跳转授权页','info')">找不到主页？</a>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">使用公共主页而<br>不是应用身份作为<br>广告发布身份</label>
+        <div class="form-control">
+          <div class="toggle-row">
+            <div class="switch" id="switchPageIdentity" onclick="toggleSwitch('switchPageIdentity')"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">多广告主广告</label>
+        <div class="form-control">
+          <div class="toggle-row">
+            <div class="switch on" id="switchMultiAdvert" onclick="toggleSwitch('switchMultiAdvert')"></div>
+            <span class="toggle-label">开启后允许将多个广告组的预算统一分配</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">网站事件追踪</label>
+        <div class="form-control">
+          <div class="form-select-wrap" style="width:260px">
+            <select class="form-select"><option value="">请选择</option></select>
+            <span class="form-select-arrow">▾</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 9. 创意组 ===== -->
+  <div class="section-card" id="creative-group">
+    <div class="section-header" onclick="toggleSection('creative-group')">
+      <span class="section-title"><span class="collapse-icon">▾</span> 创意组</span>
+      <div class="section-actions">
+        <span class="section-tab active">创意组1</span>
+        <span style="font-size:12px;color:var(--text-lighter);margin-left:8px">批量操作 ▾</span>
+        <span class="link-btn" style="font-size:12px;margin-left:8px">清空</span>
+        <button class="btn btn-primary btn-xs" style="margin-left:auto">+ 新增</button>
+        <span style="font-size:12px;color:var(--text-lighter);margin-left:4px">1/30</span>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="form-row">
+        <div class="form-control">
+          <div class="info-box">
+            <span>视频、照片、轮播、单个主页的帖子、灵活格式位图等总共最多上传50个，但多个素材也仅占用一个额度，现已上传<span style="color:var(--blue)">0/50</span>个</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">选择已有创意组</label>
+        <div class="form-control">
+          <label class="inline-check"><input type="checkbox"> 使用已保存的创意组模板</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">动态素材</label>
+        <div class="form-control">
+          <div class="toggle-row">
+            <div class="switch" id="switchDynamicAsset" onclick="toggleDynamicAsset()"></div>
+            <span class="toggle-label">开启后系统将自动优化素材组合</span>
+          </div>
+        </div>
+      </div>
+      <!-- ===== 动态素材关闭时的字段 ===== -->
+      <div id="creativeStaticFields">
+        <div class="form-row">
+          <label class="form-label">创意类型</label>
+          <div class="form-control">
+            <div class="btn-grp" id="creativeTypeGroup">
+              <button class="btn-tab active" onclick="toggleCreativeType(this)" data-type="create">创建广告</button>
+              <button class="btn-tab active" onclick="toggleCreativeType(this)" data-type="post">使用已有帖子</button>
+            </div>
+          </div>
+        </div>
+        <!-- 创建广告专属字段 -->
+        <div id="createAdOnlyFields">
+          <div class="form-row">
+            <label class="form-label">格式</label>
+            <div class="form-control">
+              <div class="btn-grp">
+                <button class="btn-tab active" onclick="selectAssetFormat(this)">灵活</button>
+                <button class="btn-tab" onclick="selectAssetFormat(this)">单图片或视频</button>
+                <button class="btn-tab" onclick="selectAssetFormat(this)">轮播</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">添加目标位置</label>
+            <div class="form-control">
+              <div class="btn-grp">
+                <button class="btn-tab active" onclick="selectBtnGrp(this)">应用</button>
+                <button class="btn-tab" onclick="selectBtnGrp(this)">试玩广告来源</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">设置方式</label>
+            <div class="form-control">
+              <div class="btn-grp">
+                <button class="btn-tab active" onclick="selectBtnGrp(this)">按创意组</button>
+                <button class="btn-tab" onclick="selectBtnGrp(this)">按素材</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">延迟深度链接</label>
+            <div class="form-control">
+              <input type="text" class="form-input" placeholder="请输入延迟深度链接" style="width:360px">
+            </div>
+          </div>
+          <!-- 名称变量标签 -->
+          <div class="form-row">
+            <div class="form-control">
+              <div class="name-hints">
+                <span class="name-tag" onclick="showToast('已插入广告系列名称')">广告系列名称</span>
+                <span class="name-tag" onclick="showToast('已插入广告组名称')">广告组名称</span>
+                <span class="name-tag" onclick="showToast('已插入广告名称')">广告名称</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">自定义商品页面</label>
+            <div class="form-control">
+              <input type="text" class="form-input" placeholder="请输入自定义商品页面ID" style="width:360px">
+            </div>
+          </div>
+          <!-- 视频素材 -->
+          <div class="form-row">
+            <label class="form-label">视频 <span style="color:var(--danger)">*</span></label>
+            <div class="form-control">
+              <div style="display:flex;align-items:center;gap:9px">
+                <button class="btn btn-primary btn-xs" onclick="showToast('视频素材上传','info')">+ 添加素材</button>
+                <span style="font-size:11px;color:var(--text-lighter)">上传按钮</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">使用进阶赋能型<br>素材优化视频广告</label>
+            <div class="form-control">
+              <div class="form-select-wrap" style="width:200px">
+                <select class="form-select">
+                  <option value="full" selected>全面优化(全选)</option>
+                  <option value="none">不优化</option>
+                </select>
+                <span class="form-select-arrow">▾</span>
+              </div>
+            </div>
+          </div>
+          <!-- 图片素材 -->
+          <div class="form-row">
+            <label class="form-label">图片 <span style="color:var(--danger)">*</span></label>
+            <div class="form-control">
+              <div style="display:flex;align-items:center;gap:9px">
+                <button class="btn btn-primary btn-xs" onclick="showToast('图片素材上传','info')">+ 添加素材</button>
+                <span style="font-size:11px;color:var(--text-lighter)">上传按钮</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="form-label">使用进阶赋能型<br>素材优化图片广告</label>
+            <div class="form-control">
+              <div class="form-select-wrap" style="width:200px">
+                <select class="form-select">
+                  <option value="full" selected>全面优化(全选)</option>
+                  <option value="none">不优化</option>
+                </select>
+                <span class="form-select-arrow">▾</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 使用已有帖子专属字段 -->
+        <div id="postOnlyFields">
+          <!-- 合创广告 -->
+          <div class="form-row">
+            <label class="form-label">合创广告</label>
+            <div class="form-control">
+              <div class="toggle-row">
+                <div class="switch" id="switchCoAd" onclick="toggleSwitch('switchCoAd')"></div>
+              </div>
+            </div>
+          </div>
+          <!-- 帖子 -->
+          <div class="form-row">
+            <label class="form-label">帖子 <span style="color:var(--danger)">*</span></label>
+            <div class="form-control">
+              <div class="form-select-wrap" style="width:360px">
+                <select class="form-select"><option value="">请选择Facebook公共主页</option></select>
+                <span class="form-select-arrow">▾</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 多语言（仅创建广告时显示） -->
+        <div class="form-row" id="rowMultiLang">
+          <label class="form-label">多语言</label>
+          <div class="form-control">
+            <div class="toggle-row">
+              <div class="switch" id="switchMultiLang" onclick="toggleSwitch('switchMultiLang')"></div>
+            </div>
+          </div>
+        </div>
+        <!-- 正文（仅创建广告时显示） -->
+        <div class="form-row" id="rowBodyText">
+          <label class="form-label">正文</label>
+          <div class="form-control">
+            <div class="btn-grp" style="margin-bottom:8px">
+              <button class="btn-tab active" onclick="selectBtnGrp(this)">选文案</button>
+              <button class="btn-tab" style="display:flex;align-items:center;gap:4px" onclick="selectBtnGrp(this)">批量添加文案 <span style="background:#f0f0f0;color:var(--text-light);padding:1px 6px;border-radius:8px;font-size:10px">1/5</span></button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="text" class="form-input" placeholder="请输入文案（自动根据字符数提示超出限制长度）" style="width:400px">
+              <span class="link-btn">添加链接</span>
+            </div>
+          </div>
+        </div>
+        <!-- 标题（仅创建广告时显示） -->
+        <div class="form-row" id="rowTitle">
+          <label class="form-label">标题</label>
+          <div class="form-control">
+            <div class="btn-grp" style="margin-bottom:8px">
+              <button class="btn-tab active" onclick="selectBtnGrp(this)">选文案</button>
+              <button class="btn-tab" style="display:flex;align-items:center;gap:4px" onclick="selectBtnGrp(this)">批量添加文案 <span style="background:#f0f0f0;color:var(--text-light);padding:1px 6px;border-radius:8px;font-size:10px">1/5</span></button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="text" class="form-input" placeholder="请输入标题（自动根据字符数提示超出限制长度）" style="width:400px">
+              <span class="link-btn">添加链接</span>
+            </div>
+          </div>
+        </div>
+        <!-- 行动号召（仅创建广告时显示） -->
+        <div class="form-row" id="rowCTA">
+          <label class="form-label">行动号召 <span style="color:var(--danger)">*</span></label>
+          <div class="form-control">
+            <div class="form-select-wrap" style="width:420px">
+              <select class="form-select"><option value="">请选择行动号召</option></select>
+              <span class="form-select-arrow">▾</span>
+            </div>
+          </div>
+        </div>
+        <!-- 标签 -->
+        <div class="form-row" id="rowTag">
+          <label class="form-label">标签</label>
+          <div class="form-control">
+            <div class="form-select-wrap" style="width:420px">
+              <select class="form-select"><option value="">请选择</option></select>
+              <span class="form-select-arrow">▾</span>
+            </div>
+          </div>
+        </div>
+        <!-- 创意组名称 -->
+        <div class="form-row" id="rowCreativeName">
+          <label class="form-label">创意组名称</label>
+          <div class="form-control">
+            <input type="text" class="form-input" value="创意组1" style="width:360px" oninput="this.classList.toggle('has-value',!!this.value)">
+          </div>
+        </div>
+        <!-- 保存创意组 -->
+        <div class="form-row" id="rowSaveCreative">
+          <div class="form-control">
+            <button class="btn btn-primary" onclick="showToast('创意组已保存','success')">保存创意组</button>
+          </div>
+        </div>
+      </div>
+      <!-- ===== 动态素材开启时显示 ===== -->
+      <div id="creativeDynamicFields" style="display:none">
+        <!-- 格式 -->
+        <div class="form-row">
+          <label class="form-label">格式</label>
+          <div class="form-control">
+            <div class="btn-grp" id="dynamicFormatGroup">
+              <button class="btn-tab active" onclick="selectDynamicFormat(this)">单图片或视频</button>
+              <button class="btn-tab" onclick="selectDynamicFormat(this)">轮播</button>
+            </div>
+          </div>
+        </div>
+        <!-- 延迟深度链接 -->
+        <div class="form-row">
+          <label class="form-label">延迟深度链接</label>
+          <div class="form-control">
+            <input type="text" class="form-input" placeholder="请输入" style="width:360px">
+            <div class="name-hints" style="margin-top:6px">
+              <span class="name-tag" onclick="showToast('已插入广告系列名称')">广告系列名称</span>
+              <span class="name-tag" onclick="showToast('已插入广告组名称')">广告组名称</span>
+              <span class="name-tag" onclick="showToast('已插入广告名称')">广告名称</span>
+            </div>
+          </div>
+        </div>
+        <!-- 自定义商品页面 -->
+        <div class="form-row">
+          <label class="form-label">自定义商品页面</label>
+          <div class="form-control">
+            <input type="text" class="form-input" placeholder="请输入自定义商品页面ID" style="width:360px">
+          </div>
+        </div>
+        <!-- 视频（单图片或视频格式） -->
+        <div class="form-row" id="dynamicVideoRow">
+          <label class="form-label">视频 <span style="color:var(--danger)">*</span></label>
+          <div class="form-control">
+            <button class="btn btn-primary btn-xs" onclick="showToast('视频素材上传','info')">+ 添加素材</button>
+          </div>
+        </div>
+        <!-- 图片（单图片或视频格式） -->
+        <div class="form-row" id="dynamicImageRow">
+          <label class="form-label">图片 <span style="color:var(--danger)">*</span></label>
+          <div class="form-control">
+            <button class="btn btn-primary btn-xs" onclick="showToast('图片素材上传','info')">+ 添加素材</button>
+          </div>
+        </div>
+        <!-- 轮播（轮播格式） -->
+        <div class="form-row" id="dynamicCarouselRow" style="display:none">
+          <label class="form-label">轮播 <span style="color:var(--danger)">*</span></label>
+          <div class="form-control">
+            <button class="btn btn-primary btn-xs" onclick="showToast('轮播素材上传','info')">+ 添加素材</button>
+          </div>
+        </div>
+        <!-- 正文 -->
+        <div class="form-row">
+          <label class="form-label">正文</label>
+          <div class="form-control">
+            <div class="btn-grp" style="margin-bottom:8px">
+              <button class="btn-tab active" onclick="selectBtnGrp(this)">选文案</button>
+              <button class="btn-tab" style="display:flex;align-items:center;gap:4px" onclick="selectBtnGrp(this)">批量添加文案 <span style="background:#f0f0f0;color:var(--text-light);padding:1px 6px;border-radius:8px;font-size:10px">1/5</span></button>
+            </div>
+            <textarea class="form-input" placeholder="请输入正文" style="width:100%;max-width:420px;height:72px;resize:vertical"></textarea>
+            <div style="margin-top:6px"><span class="link-btn">添加</span></div>
+          </div>
+        </div>
+        <!-- 标题 -->
+        <div class="form-row">
+          <label class="form-label">标题 <span class="tip" title="标题提示">ⓘ</span></label>
+          <div class="form-control">
+            <div class="btn-grp" style="margin-bottom:8px">
+              <button class="btn-tab active" onclick="selectBtnGrp(this)">选文案</button>
+              <button class="btn-tab" style="display:flex;align-items:center;gap:4px" onclick="selectBtnGrp(this)">批量添加文案 <span style="background:#f0f0f0;color:var(--text-light);padding:1px 6px;border-radius:8px;font-size:10px">1/5</span></button>
+            </div>
+            <textarea class="form-input" placeholder="请输入标题" style="width:100%;max-width:420px;height:56px;resize:vertical"></textarea>
+            <div style="margin-top:6px"><span class="link-btn">添加</span></div>
+          </div>
+        </div>
+        <!-- 行动号召 -->
+        <div class="form-row">
+          <label class="form-label">行动号召 <span style="color:var(--danger)">*</span></label>
+          <div class="form-control">
+            <div class="form-select-wrap" style="width:320px">
+              <select class="form-select"><option value="">请选择</option></select>
+              <span class="form-select-arrow">▾</span>
+            </div>
+          </div>
+        </div>
+        <!-- 针对每位用户优化创意（单图片或视频格式显示，轮播格式隐藏） -->
+        <div class="form-row" id="dynamicOptimizeRow">
+          <label class="form-label">针对每位用户优化创意</label>
+          <div class="form-control">
+            <div class="toggle-row">
+              <div class="switch on" id="switchOptimizePerUser" onclick="toggleSwitch('switchOptimizePerUser')"></div>
+            </div>
+          </div>
+        </div>
+        <!-- 标签 -->
+        <div class="form-row">
+          <label class="form-label">标签 <span class="tip" title="标签提示">ⓘ</span></label>
+          <div class="form-control">
+            <div class="form-select-wrap" style="width:320px">
+              <select class="form-select"><option value="">请选择</option></select>
+              <span class="form-select-arrow">▾</span>
+            </div>
+          </div>
+        </div>
+        <!-- 创意组名称 -->
+        <div class="form-row">
+          <label class="form-label">创意组名称</label>
+          <div class="form-control">
+            <input type="text" class="form-input" value="创意组1" style="width:360px" oninput="this.classList.toggle('has-value',!!this.value)">
+          </div>
+        </div>
+        <!-- 保存创意组 -->
+        <div class="form-row">
+          <div class="form-control">
+            <button class="btn btn-primary" onclick="showToast('创意组已保存','success')">保存创意组</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer-bar">
+  <button class="btn btn-default" onclick="resetForm()">重置</button>
+  <button class="btn btn-default" onclick="saveDraft()">保存草稿并退出</button>
+  <button class="btn btn-primary" onclick="previewCampaign()">预览</button>
+  <button class="btn btn-outline" onclick="saveTemplate()">保存模板</button>
+</div>
+
+<!-- ===== TOAST CONTAINER ===== -->
+<div id="toastContainer" style="position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:3000;pointer-events:none"></div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">设置</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="confirmModal()">确认</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ SECTION TOGGLE ============
+function toggleSection(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('collapsed');
+}
+window._sectionToggle = toggleSection;
+
+// ============ SCROLL TO SECTION ============
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  // Expand if collapsed
+  el.classList.remove('collapsed');
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Update sidebar
+  document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.section === id);
+  });
+}
+
+// Scroll observer for sidebar
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.section === id);
+      });
+    }
+  });
+}, { threshold: 0.2, rootMargin: '-50px 0px -60% 0px' });
+
+document.querySelectorAll('.section-card').forEach(el => sectionObserver.observe(el));
+
+// ============ TOGGLE SWITCH ============
+function toggleSwitch(switchId, labelId, onText, offText) {
+  const sw = document.getElementById(switchId);
+  sw.classList.toggle('on');
+  if (labelId && onText) {
+    document.getElementById(labelId).textContent = sw.classList.contains('on') ? onText : offText;
+  }
+}
+
+function toggleiOS14() {
+  const sw = document.getElementById('switchiOS14');
+  sw.classList.toggle('on');
+  document.getElementById('ios14Detail').classList.toggle('visible', sw.classList.contains('on'));
+}
+
+function toggleAdvAudience() {
+  const sw = document.getElementById('switchAdvAudience');
+  sw.classList.toggle('on');
+  const isOn = sw.classList.contains('on');
+  // ON → 最低年龄限制 + 年龄建议; OFF → 年龄
+  document.getElementById('rowMinAge').style.display = isOn ? 'flex' : 'none';
+  document.getElementById('rowAgeSuggestion').style.display = isOn ? 'flex' : 'none';
+  document.getElementById('rowAgeOnly').style.display = isOn ? 'none' : 'flex';
+}
+
+// ============ CUSTOM AUDIENCE ============
+function selectCustomAudience(el) {
+  el.parentElement.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  var section = document.getElementById('customAudienceSection');
+  section.classList.toggle('visible', el.textContent.trim() === '自定义');
+}
+
+function switchAudienceSource(el, source) {
+  el.parentElement.querySelectorAll('.dual-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function switchAudienceDualTab(el, tab) {
+  el.parentElement.querySelectorAll('.dual-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function clearAudienceRight() {
+  showToast('已清除受众选择', 'success');
+}
+
+// ============ CREATIVE GROUP ============
+function toggleCreativeType(el) {
+  el.classList.toggle('active');
+  var type = el.getAttribute('data-type');
+  var isActive = el.classList.contains('active');
+  if (type === 'create') {
+    document.getElementById('createAdOnlyFields').style.display = isActive ? '' : 'none';
+  } else if (type === 'post') {
+    document.getElementById('postOnlyFields').style.display = isActive ? '' : 'none';
+  }
+  // 判断哪个按钮是 active
+  var createBtn = document.querySelector('#creativeTypeGroup button[data-type="create"]');
+  var postBtn = document.querySelector('#creativeTypeGroup button[data-type="post"]');
+  var createOn = createBtn.classList.contains('active');
+  var postOn = postBtn.classList.contains('active');
+  // 共享字段：多语言/正文/标题/行动号召 仅在「创建广告」选中时显示
+  var createOnlyShared = ['rowMultiLang','rowBodyText','rowTitle','rowCTA'];
+  createOnlyShared.forEach(function(id) {
+    document.getElementById(id).style.display = createOn ? '' : 'none';
+  });
+  // 标签/创意组名称/保存 始终显示
+  ['rowTag','rowCreativeName','rowSaveCreative'].forEach(function(id) {
+    document.getElementById(id).style.display = '';
+  });
+}
+
+function toggleDynamicAsset() {
+  var sw = document.getElementById('switchDynamicAsset');
+  sw.classList.toggle('on');
+  var isOn = sw.classList.contains('on');
+  document.getElementById('creativeStaticFields').style.display = isOn ? 'none' : '';
+  document.getElementById('creativeDynamicFields').style.display = isOn ? '' : 'none';
+}
+
+function selectDynamicFormat(el) {
+  el.parentElement.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  var isCarousel = el.textContent.trim() === '轮播';
+  document.getElementById('dynamicVideoRow').style.display = isCarousel ? 'none' : '';
+  document.getElementById('dynamicImageRow').style.display = isCarousel ? 'none' : '';
+  document.getElementById('dynamicCarouselRow').style.display = isCarousel ? '' : 'none';
+  document.getElementById('dynamicOptimizeRow').style.display = isCarousel ? 'none' : '';
+}
+
+function selectAssetFormat(el) {
+  el.parentElement.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function toggleAdvancedOptions(el) {
+  advancedVisible = !advancedVisible;
+  var tgt = document.getElementById('advancedOptions');
+  tgt.style.display = advancedVisible ? '' : 'none';
+  var btn = document.getElementById('advancedToggleBtn');
+  btn.textContent = advancedVisible ? '▲ 隐藏高级选项' : '▼ 显示高级选项';
+}
+
+var advancedVisible = false;
+function toggleAdvancedOptions() {
+  advancedVisible = !advancedVisible;
+  document.getElementById('advancedOptions').style.display = advancedVisible ? '' : 'none';
+  document.getElementById('advancedToggleBtn').textContent = advancedVisible ? '▲ 隐藏高级选项' : '▼ 显示高级选项';
+}
+
+// ============ MULTI-SELECT ============
+const msState = {};
+
+function getMSState(msId) {
+  if (!msState[msId]) msState[msId] = { selected: new Set(), open: false };
+  return msState[msId];
+}
+
+function toggleMS(msId) {
+  const wrap = document.getElementById(msId);
+  const state = getMSState(msId);
+  state.open = !state.open;
+  wrap.classList.toggle('open', state.open);
+}
+
+function toggleMSCheck(el, msId, label) {
+  const state = getMSState(msId);
+  if (state.selected.has(label)) {
+    state.selected.delete(label);
+    el.classList.remove('selected');
+  } else {
+    state.selected.add(label);
+    el.classList.add('selected');
+  }
+  renderMSTags(msId);
+  // Special handling for special ad category
+  if (msId === 'msSpecialCat') {
+    document.getElementById('specialRegionSection').classList.toggle('visible', state.selected.size > 0);
+  }
+}
+
+function renderMSTags(msId) {
+  const state = getMSState(msId);
+  const disp = document.getElementById(msId + 'Disp');
+  const ph = document.getElementById(msId + 'Ph');
+  const countEl = document.getElementById(msId + 'Count');
+
+  if (msId === 'msAccount') {
+    document.getElementById('rpAccountCount').textContent = state.selected.size || '1';
+  }
+
+  // Remove existing tags
+  disp.querySelectorAll('.ms-tag').forEach(t => t.remove());
+
+  if (state.selected.size === 0) {
+    if (ph) ph.style.display = '';
+  } else {
+    if (ph) ph.style.display = 'none';
+    state.selected.forEach(label => {
+      const tag = document.createElement('span');
+      tag.className = 'ms-tag';
+      tag.innerHTML = `${label} <span class="remove" onclick="event.stopPropagation();removeMSTag('${msId}','${label.replace(/'/g,"\\'")}')">×</span>`;
+      disp.insertBefore(tag, disp.querySelector('.ms-arrow'));
+    });
+  }
+  if (countEl) countEl.textContent = state.selected.size;
+}
+
+function removeMSTag(msId, label) {
+  const state = getMSState(msId);
+  state.selected.delete(label);
+  // Uncheck in dropdown
+  const dd = document.getElementById(msId);
+  dd.querySelectorAll('.ms-dd-item').forEach(item => {
+    if (item.querySelector('label').textContent === label) {
+      item.classList.remove('selected');
+      item.querySelector('input').checked = false;
+    }
+  });
+  renderMSTags(msId);
+  if (msId === 'msSpecialCat' && state.selected.size === 0) {
+    document.getElementById('specialRegionSection').classList.remove('visible');
+  }
+}
+
+function clearMS(msId) {
+  const state = getMSState(msId);
+  state.selected.clear();
+  const dd = document.getElementById(msId);
+  dd.querySelectorAll('.ms-dd-item').forEach(item => {
+    item.classList.remove('selected');
+    item.querySelector('input').checked = false;
+  });
+  renderMSTags(msId);
+  if (msId === 'msSpecialCat') {
+    document.getElementById('specialRegionSection').classList.remove('visible');
+  }
+}
+
+function filterMS(msId, query) {
+  const dd = document.getElementById(msId);
+  const q = query.toLowerCase();
+  dd.querySelectorAll('.ms-dd-item').forEach(item => {
+    item.style.display = item.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.ms-wrap')) {
+    document.querySelectorAll('.ms-wrap.open').forEach(el => {
+      el.classList.remove('open');
+      const msId = el.id;
+      if (msState[msId]) msState[msId].open = false;
+    });
+  }
+});
+
+// ============ DUAL PANEL ============
+function selectDualItem(el, leftId, rightId, label) {
+  el.classList.toggle('selected');
+  const right = document.getElementById(rightId);
+  const empty = document.getElementById(rightId.replace('Right','') + 'Empty');
+  
+  if (el.classList.contains('selected')) {
+    // Add to right
+    if (empty) empty.style.display = 'none';
+    const item = document.createElement('div');
+    item.className = 'dual-item selected';
+    item.textContent = label;
+    item.onclick = function() { this.remove(); el.classList.remove('selected'); updateDualCount(rightId, this.parentElement); };
+    right.appendChild(item);
+  } else {
+    // Remove from right
+    Array.from(right.children).forEach(child => {
+      if (child.textContent === label) child.remove();
+    });
+    if (right.children.length === 0 && empty) empty.style.display = '';
+  }
+  updateDualCount(rightId, right);
+}
+
+function updateDualCount(rightId, container) {
+  const items = container.querySelectorAll('.dual-item');
+  const tabId = rightId.replace('Right','');
+  const tab = document.getElementById('dualTab' + (tabId === 'specialRegion' ? 'Include' : 'Include'));
+  if (tab) tab.textContent = `定向(${items.length})`;
+}
+
+function clearDualRight() {
+  const right = document.getElementById('specialRegionRight');
+  right.querySelectorAll('.dual-item').forEach(item => item.remove());
+  document.getElementById('specialRegionEmpty').style.display = '';
+  document.getElementById('dualTabInclude').textContent = '定向(0)';
+  document.querySelectorAll('#specialRegionLeft .dual-item').forEach(item => item.classList.remove('selected'));
+}
+
+function switchDualTab(el, otherId) {
+  el.classList.add('active');
+  document.getElementById(otherId).classList.remove('active');
+}
+
+// ============ BUDGET ============
+function selectBudget(el) {
+  el.parentElement.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const isDaily = el.getAttribute('data-budget') === 'daily';
+  document.getElementById('spendLimitRow').style.display = isDaily ? '' : 'none';
+}
+
+// ============ STRATEGY ============
+function selectStrategy(el) {
+  el.parentElement.querySelectorAll('.strategy-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  // 仅「竞价上限」显示加速投放类型
+  const isBidCap = el.textContent.trim() === '竞价上限';
+  const accelerateBtn = document.getElementById('pacingAccelerate');
+  const pacingBtns = accelerateBtn.parentElement.querySelectorAll('.btn-tab');
+  if (isBidCap) {
+    accelerateBtn.style.display = '';
+  } else {
+    accelerateBtn.style.display = 'none';
+    // 确保匀速是选中态
+    pacingBtns[0].classList.add('active');
+    pacingBtns.forEach((b,i) => { if (i>0) b.classList.remove('active'); });
+  }
+}
+
+// ============ OPTIMIZATION GOAL ============
+function selectOptimizationGoal(el) {
+  el.parentElement.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  var goal = el.textContent.trim();
+
+  // 应用事件 → 显示应用事件下拉
+  document.getElementById('rowAppEvent').style.display = (goal === '应用事件数量最大化') ? 'flex' : 'none';
+
+  // 链接点击最大化 → 隐藏归因设置
+  document.getElementById('rowAttribution').style.display = (goal === '链接点击最大化') ? 'none' : 'flex';
+
+  // 归因设置选项：应用安装量→点击后1天内，浏览后1天内; 应用事件数量→点击后7天内
+  var attr = document.getElementById('attributionSelect');
+  if (goal === '应用事件数量最大化') {
+    attr.value = 'click7d';
+  } else {
+    attr.value = 'click1d_view1d';
+  }
+
+  // 计费方式：链接点击最大化→两个选项; 其他→仅展示次数
+  var cpcBtn = document.getElementById('billCPC');
+  var billingBtns = document.getElementById('billingBtns');
+  if (goal === '链接点击最大化') {
+    cpcBtn.style.display = '';
+    // ensure 展示次数 is active
+    billingBtns.querySelectorAll('.btn-tab').forEach((b,i) => { if(i===0) b.classList.add('active'); else b.classList.remove('active'); });
+  } else {
+    cpcBtn.style.display = 'none';
+    billingBtns.querySelector('.btn-tab').classList.add('active');
+  }
+}
+
+// ============ BUTTON GROUP ============
+function selectBtnGrp(el) {
+  el.parentElement.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ============ SPEND LIMIT ============
+function selectSpendLimit(el) {
+  el.parentElement.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('spendLimitCustom').style.display = 
+    el.textContent.trim() === '自定义' ? 'block' : 'none';
+}
+
+// ============ PLACEMENT ============
+function selectPlacement(el, type) {
+  el.parentElement.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('manualPlacementSection').classList.toggle('visible', type === 'manual');
+}
+
+function selectPlatform(el) {
+  el.parentElement.querySelectorAll('.platform-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function updatePlacementCount() {
+  const total = document.querySelectorAll('#manualPlacementSection input[type=checkbox]:checked').length;
+  document.getElementById('placementCount').textContent = `已选择 ${total} 个版位`;
+}
+
+// ============ NAME HINTS ============
+function insertVar(inputId, text) {
+  const input = document.getElementById(inputId);
+  const pos = input.selectionStart || input.value.length;
+  input.value = input.value.slice(0, pos) + text + input.value.slice(pos);
+  input.classList.add('has-value');
+  input.focus();
+  input.setSelectionRange(pos + text.length, pos + text.length);
+}
+
+let hintsExpanded = false;
+function toggleExtraHints() {
+  hintsExpanded = !hintsExpanded;
+  document.getElementById('extraHints').style.display = hintsExpanded ? 'block' : 'none';
+  document.getElementById('hintExpandBtn').textContent = hintsExpanded ? '收起 ▴' : '展开 ▾';
+}
+
+let adGroupHintsExpanded = false;
+function toggleAdGroupHints() {
+  adGroupHintsExpanded = !adGroupHintsExpanded;
+  document.getElementById('adGroupExtraHints').style.display = adGroupHintsExpanded ? 'block' : 'none';
+  document.getElementById('adGroupHintExpandBtn').textContent = adGroupHintsExpanded ? '收起 ▴' : '展开 ▾';
+}
+
+// ============ APP STORE ============
+function selectAppStore(el) {
+  el.parentElement.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ============ CREATIVE NAME HINTS ============
+let creativeHintsExpanded = false;
+function toggleCreativeHints() {
+  creativeHintsExpanded = !creativeHintsExpanded;
+  document.getElementById('creativeExtraHints').style.display = creativeHintsExpanded ? 'block' : 'none';
+  document.getElementById('creativeHintExpandBtn').textContent = creativeHintsExpanded ? '收起 ▴' : '展开 ▾';
+}
+
+// ============ REGION DUAL PANEL ============
+let regionIncludeItems = [];
+let regionExcludeItems = [];
+let currentRegionTab = 'include';
+
+function addRegionItem(el, name) {
+  if (el.classList.contains('selected')) return;
+  el.classList.add('selected');
+  if (currentRegionTab === 'include') {
+    regionIncludeItems.push(name);
+  } else {
+    regionExcludeItems.push(name);
+  }
+  updateRegionRightList();
+}
+
+function switchDualTab2(el, tab) {
+  currentRegionTab = tab;
+  el.parentElement.querySelectorAll('.dual-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  updateRegionRightList();
+}
+
+function updateRegionRightList() {
+  const list = currentRegionTab === 'include' ? regionIncludeItems : regionExcludeItems;
+  const container = document.getElementById('regionRightList');
+  document.getElementById('regionIncludeCount').textContent = regionIncludeItems.length;
+  document.getElementById('regionExcludeCount').textContent = regionExcludeItems.length;
+  if (list.length === 0) {
+    container.innerHTML = '<div class="dual-empty">暂无</div>';
+  } else {
+    container.innerHTML = list.map((n,i) =>
+      '<div class="dual-item" style="display:flex;justify-content:space-between;align-items:center">' +
+      '<span>' + n + '</span>' +
+      '<span style="cursor:pointer;color:#999;margin-left:8px" onclick="removeRegionItem('+i+')">✕</span>' +
+      '</div>'
+    ).join('');
+  }
+}
+
+function removeRegionItem(idx) {
+  if (currentRegionTab === 'include') {
+    regionIncludeItems.splice(idx, 1);
+  } else {
+    regionExcludeItems.splice(idx, 1);
+  }
+  updateRegionRightList();
+}
+
+function clearRegionRight() {
+  regionIncludeItems = [];
+  regionExcludeItems = [];
+  // Also clear selected state on left
+  document.querySelectorAll('#region .dual-left .dual-item').forEach(item => item.classList.remove('selected'));
+  updateRegionRightList();
+  showToast('已清除所有已选地区', 'info');
+}
+
+// ============ MODAL ============
+function openModal(title, content) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = content;
+  document.getElementById('modalOverlay').classList.add('visible');
+}
+
+function closeModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('modalOverlay').classList.remove('visible');
+}
+
+function confirmModal() {
+  closeModal();
+  showToast('操作已确认', 'success');
+}
+
+// ============ TOAST ============
+function showToast(msg, type) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type || 'success'}`;
+  toast.innerHTML = `<span>${type === 'error' ? '✕' : type === 'warning' ? '⚠' : '✓'}</span> ${msg}`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity .3s'; }, 2000);
+  setTimeout(() => toast.remove(), 2500);
+}
+
+// ============ FOOTER ACTIONS ============
+function resetForm() {
+  openModal('确认重置', '<p>此操作将清空所有已填写的配置信息，是否继续？</p><p style="color:var(--red);font-size:12px;margin-top:8px">⚠ 此操作不可撤销</p>');
+  // Override confirm for reset
+  const confirmBtn = document.querySelector('#modalOverlay .btn-primary');
+  confirmBtn.onclick = function() {
+    // Reset multi-selects
+    ['msAccount','msSpecialCat'].forEach(id => {
+      const state = getMSState(id);
+      state.selected.clear();
+      const dd = document.getElementById(id);
+      dd.querySelectorAll('.ms-dd-item').forEach(item => {
+        item.classList.remove('selected');
+        item.querySelector('input').checked = false;
+      });
+      renderMSTags(id);
+    });
+    // Reset inputs
+    document.getElementById('campaignName').value = '';
+    document.getElementById('campaignName').classList.remove('has-value');
+    document.getElementById('budgetValue').value = '';
+    document.getElementById('budgetValue').classList.remove('has-value');
+    document.getElementById('xmpProduct').value = '';
+    document.getElementById('xmpProduct').classList.remove('has-value');
+    // Hide conditional sections
+    document.getElementById('specialRegionSection').classList.remove('visible');
+    document.getElementById('customAudienceSection').classList.remove('visible');
+    document.getElementById('ios14Detail').classList.remove('visible');
+    document.getElementById('spendLimitCustom').style.display = 'none';
+    document.getElementById('manualPlacementSection').classList.remove('visible');
+    // Reset switches
+    document.getElementById('switchStatus').classList.add('on');
+    document.getElementById('switchiOS14').classList.remove('on');
+    document.getElementById('switchCBO').classList.add('on');
+    // Reset advanced audience
+    document.getElementById('switchAdvAudience').classList.add('on');
+    document.getElementById('rowMinAge').style.display = 'flex';
+    document.getElementById('rowAgeSuggestion').style.display = 'flex';
+    document.getElementById('rowAgeOnly').style.display = 'none';
+    // Reset budget/limit tabs
+    document.querySelectorAll('#campaign .btn-grp .btn-tab').forEach((b,i) => {if(i===0)b.classList.add('active');else b.classList.remove('active')});
+    document.getElementById('spendLimitRow').style.display = ''; // 单日预算时显示
+    // Reset strategy
+    document.querySelectorAll('.strategy-tab').forEach((b,i) => {if(i===0)b.classList.add('active');else b.classList.remove('active')});
+    // 非竞价上限时隐藏加速，重置为匀速
+    var accel = document.getElementById('pacingAccelerate');
+    accel.style.display = 'none';
+    accel.parentElement.querySelector('.btn-tab').classList.add('active');
+    // Reset placement
+    document.querySelectorAll('#manualPlacementSection input[type=checkbox]').forEach(cb => cb.checked = true);
+    updatePlacementCount();
+    // Reset placement setting
+    const placementBtns = document.querySelectorAll('#placement .btn-grp .btn-tab');
+    placementBtns[0].classList.add('active');
+    placementBtns[1].classList.remove('active');
+    // Reset custom audience
+    const audBtns = document.querySelectorAll('#customAudienceSection').length>0 ? document.getElementById('customAudienceSection').closest('.form-control').querySelectorAll('.btn-grp .btn-tab') : [];
+    audBtns.forEach((b,i) => {if(i===0)b.classList.add('active');else b.classList.remove('active')});
+    // Reset optimization goal
+    document.getElementById('rowAppEvent').style.display = 'none';
+    document.getElementById('rowAttribution').style.display = 'flex';
+    document.getElementById('attributionSelect').value = 'click1d_view1d';
+    document.getElementById('billCPC').style.display = 'none';
+    document.getElementById('billingBtns').querySelector('.btn-tab').classList.add('active');
+    // Reset creative group
+    document.getElementById('switchDynamicAsset').classList.remove('on');
+    document.getElementById('creativeStaticFields').style.display = '';
+    document.getElementById('creativeDynamicFields').style.display = 'none';
+    // Reset dynamic format to 单图片或视频
+    var dynFmtBtns = document.querySelectorAll('#dynamicFormatGroup .btn-tab');
+    dynFmtBtns.forEach(function(b,i) { if(i===0)b.classList.add('active'); else b.classList.remove('active'); });
+    document.getElementById('dynamicVideoRow').style.display = '';
+    document.getElementById('dynamicImageRow').style.display = '';
+    document.getElementById('dynamicCarouselRow').style.display = 'none';
+    document.getElementById('dynamicOptimizeRow').style.display = '';
+    // Reset creative type - both checked by default
+    var ctBtns = document.querySelectorAll('#creativeTypeGroup .btn-tab');
+    ctBtns.forEach(function(b) { b.classList.add('active'); });
+    document.getElementById('createAdOnlyFields').style.display = '';
+    document.getElementById('postOnlyFields').style.display = '';
+    ['rowMultiLang','rowBodyText','rowTitle','rowCTA'].forEach(function(id) {
+      document.getElementById(id).style.display = '';
+    });
+    // Close modal
+    closeModal();
+    showToast('所有配置已重置', 'success');
+  };
+}
+
+function saveDraft() {
+  showToast('草稿已保存', 'success');
+}
+
+function previewCampaign() {
+  openModal('广告预览', `
+    <div style="background:#f5f7fa;border-radius:6px;padding:16px;margin-bottom:12px">
+      <div style="font-weight:600;margin-bottom:8px">广告系列摘要</div>
+      <div style="font-size:12px;color:var(--text-light);display:grid;gap:4px">
+        <div>目标：应用推广</div>
+        <div style="margin-top:8px;font-weight:500">请完成以下配置后提交：</div>
+        <div style="color:var(--green)">✓ 基础设置</div>
+        <div style="color:var(--green)">✓ 广告系列</div>
+        <div style="color:#aaa">○ 投放内容</div>
+        <div style="color:var(--green)">✓ 版位</div>
+        <div style="color:#aaa">○ 地区组</div>
+        <div style="color:#aaa">○ 定向包</div>
+        <div style="color:#aaa">○ 出价和预算</div>
+        <div style="color:#aaa">○ 创意设置</div>
+        <div style="color:#aaa">○ 创意组</div>
+      </div>
+    </div>
+  `);
+}
+
+function saveTemplate() {
+  openModal('保存模板', `
+    <div class="form-row" style="margin-bottom:12px">
+      <label class="form-label required">模板名称</label>
+      <div class="form-control"><input type="text" class="form-input" placeholder="请输入模板名称" id="templateNameInput"></div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">模板描述</label>
+      <div class="form-control"><input type="text" class="form-input" placeholder="可选，模板描述"></div>
+    </div>
+  `);
+  const confirmBtn = document.querySelector('#modalOverlay .btn-primary');
+  confirmBtn.onclick = function() {
+    const name = document.getElementById('templateNameInput')?.value || '未命名模板';
+    closeModal();
+    showToast(`模板"${name}"已保存`, 'success');
+  };
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  // Initial multi-select state setup
+  renderMSTags('msAccount');
+  renderMSTags('msSpecialCat');
+  updatePlacementCount();
+});
+</script>
+</body>
+</html>

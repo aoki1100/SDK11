@@ -1,0 +1,6 @@
+{
+  "name": "AdTool Beta",
+  "description": "Interactive TikTok Ad management platform featuring campaigns management, local & remote creative folders, linked ad accounts, activity logs, and system security setups.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
